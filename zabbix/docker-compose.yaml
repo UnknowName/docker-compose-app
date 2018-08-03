@@ -1,0 +1,41 @@
+db:
+  image: mysql:5.7
+  volumes:
+    - ./data:/var/lib/mysql
+  environment:
+    - MYSQL_ROOT_PASSWORD='zabbix'
+  restart: always
+
+server:
+  image: zabbix/zabbix-server-mysql
+  ports:
+    - "10051:10051"
+  volumes:
+    - ./alertscripts:/usr/lib/zabbix/alertscripts
+    - ./externalscripts:/usr/lib/zabbix/externalscripts
+  environment:
+    - DB_SERVER_HOST=db
+    - MYSQL_USER=root
+    - MYSQL_PASSWORD=zabbix
+    - ZBX_CACHESIZE=200M
+    - ZBX_STARTPINGERS=5
+    - ZBX_STARTPOLLERS=10
+  links:
+    - db
+  restart: always
+
+web:
+  image: zabbix/zabbix-web-nginx-mysql
+  ports:
+    - '8080:80'
+  environment:
+    - PHP_TZ=Asia/Shanghai
+    - ZBX_SERVER_HOST=server
+    - DB_SERVER_HOST=db
+    - ZBX_MEMORYLIMIT=500M
+    - MYSQL_USER=root
+    - MYSQL_PASSWORD=zabbix
+  links:
+    - db
+    - server
+  restart: always
