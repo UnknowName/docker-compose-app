@@ -39,3 +39,7 @@ web:
     - db
     - server
   restart: always
+  
+  #This Step is must
+  # docker exec -ti zabbix_db_1 mysql -u root -p
+  #mysql>grant all privileges on *.* to root@'%' identified by 'zabbix';
