@@ -4,6 +4,7 @@ db:
     - ./data:/var/lib/mysql
   environment:
     - MYSQL_ROOT_PASSWORD='zabbix'
+    - TZ=Asia/Shanghai
   restart: always
 
 server:
@@ -27,7 +28,7 @@ server:
 web:
   image: zabbix/zabbix-web-nginx-mysql
   ports:
-    - '8080:80'
+    - '8081:80'
   environment:
     - PHP_TZ=Asia/Shanghai
     - ZBX_SERVER_HOST=server
@@ -43,3 +44,4 @@ web:
   #This Step is must
   # docker exec -ti zabbix_db_1 mysql -u root -p
   #mysql>grant all privileges on *.* to root@'%' identified by 'zabbix';
+  #mysql>flush privileges;

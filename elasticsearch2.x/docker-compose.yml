@@ -9,9 +9,14 @@ elasticsearch1:
   image: elasticsearch:2.4.1
   restart: always
   net: 'host'
+  privileged: true
+  environment:
+    # 50% Memory
+    - "JAVA_OPTS=-Xms2g -Xmx2g"
+    - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
   volumes:
     - ./data/elasticsearch:/usr/share/elasticsearch/data
-    - ./config:/usr/share/elasticsearch/config
+    # - ./config:/usr/share/elasticsearch/config
     - ./plugins:/usr/share/elasticsearch/plugins
   #最少master = eligible_master_number/2 + 1
   command:

@@ -408,3 +408,4 @@ index:
 #http.jsonp.enable: true
 
 #index.analysis.analyzer.ik.type: "ik"
+ES_JAVA_OPTS="-Xms2g -Xmx2g"

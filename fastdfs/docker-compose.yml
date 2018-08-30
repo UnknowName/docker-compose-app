@@ -3,7 +3,7 @@ version: "2"
 services:
   tracker:
     container_name: fdfs_tracker
-    image: klzsysy/fdfs:5.11
+    image: waj615/fdfs-centos:5.11
     restart: always
     environment:
       - TRACKER_PORT=22122
@@ -14,7 +14,7 @@ services:
 
   storage:
     container_name: fdfs_storage
-    image: klzsysy/fdfs:5.11
+    image: waj615/fdfs-centos:5.11
     restart: always
     environment:
       # tracker server地址可多个，多个时候变量加数字即可
@@ -23,7 +23,7 @@ services:
       # - TRACKER_SERVER..=....
       # 只有一个tracker server 如下：
       # IP:PORT
-      - TRACKER_SERVER=192.195.24.142:22122
+      - TRACKER_SERVER=172.16.11.146:22122
       # 当group有多个时增加数量
       - GROUP_COUNT=1
       # 当前group名
