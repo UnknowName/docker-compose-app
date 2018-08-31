@@ -24,6 +24,7 @@ services:
       - network.host=0.0.0.0
       - xpack.security.enabled=false
       - indices.fielddata.cache.size=10%
+      - JAVA_OPTS=-Xms512m -Xmx512m
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
@@ -47,8 +48,9 @@ services:
       - GRAYLOG_TRANSPORT_EMAIL_PORT=25
       - GRAYLOG_TRANSPORT_EMAIL_USE_AUTH=false
       - GRAYLOG_TRANSPORT_EMAIL_USE_TLS=false
-      - GRAYLOG_TRANSPORT_EMAIL_USE_USERNAME=username
-      - GRAYLOG_TRANSPORT_EMAIL_USE_PASSWORD=password
+      - GRAYLOG_TRANSPORT_EMAIL_AUTH_USERNAME=username
+      - GRAYLOG_TRANSPORT_EMAIL_AUTH_PASSWORD=password
+      - GRAYLOG_ROOT_TIMEZONE=Asia/Shanghai
       
     links:
       - mongodb:mongo
