@@ -7,6 +7,8 @@ cassandra:
     # - CASSANDRA_SEEDS=172.16.11.1
     - CASSANDRA_BROADCAST_ADDRESS=172.16.11.1
     - CASSANDRA_LISTEN_ADDRESS=172.16.11.1
+    - MAX_HEAP_SIZE=100M
+    - HEAP_NEWSIZE=10M
   volumes:
     - ./hosts:/etc/hosts
     - ./data:/var/lib/cassandra
