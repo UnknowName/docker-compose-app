@@ -1,14 +1,15 @@
 # 单节点
 mongo:
-  image: mongo:3.4
+  image: mongo:4
+  net: host
   restart: always
   environment:
     - TZ=Asia/Shanghai
-  ports:
-    - "27017:27017"
+    - MONGO_INITDB_ROOT_USERNAME=admin
+    - MONGO_INITDB_ROOT_PASSWORD=mongoadmin
   volumes:
     - /etc/localtime:/etc/localtime:ro
-    - ./db:/data/db
+    - ./db:/data/db:z
 
 # mkdir ./db
 # chown 999 -R ./db
