@@ -4,12 +4,14 @@ services:
   mongodb:
     image: mongo:3
     container_name: graylog_db
+    restart: always
     environment:
       - TZ=Asia/Shanghai
     volumes:
       - ./mongodata:/data/db
 
   elasticsearch:
+    restart: always
     image: elasticsearch:5.6.4
     container_name: graylog_elas
     volumes:
@@ -32,6 +34,7 @@ services:
         hard: -1
     # mem_limit: 1g
   graylog:
+    restart: always
     image: graylog/graylog:2.4.6-1
     container_name: graylog_server
     volumes:
