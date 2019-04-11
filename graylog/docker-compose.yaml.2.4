@@ -3,45 +3,58 @@ services:
   # MongoDB: https://hub.docker.com/_/mongo/
   mongodb:
     image: mongo:3
+    container_name: graylog_db
     restart: always
-    container_name: graylog-db
-    volumes:
-      - ./mongo_data:/data/db
-  # Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/6.6/docker.html
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.1
-    restart: always
-    container_name: graylog-es
-    volumes:
-      - /etc/localtime:/etc/localtime
-      - ./elas_data:/usr/share/elasticsearch/data
     environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./mongodata:/data/db
+
+  elasticsearch:
+    restart: always
+    image: elasticsearch:5.6.4
+    container_name: graylog_elas
+    volumes:
+      - ./elasdata:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - TZ=Asia/Shanghai
       - http.host=0.0.0.0
-      - transport.host=0.0.0.0
+      - transport.host=localhost
       - network.host=0.0.0.0
+      - xpack.security.enabled=false
+      - indices.fielddata.cache.size=10%
+      - JAVA_OPTS=-Xms512m -Xmx512m
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 1g
-  # Graylog: https://hub.docker.com/r/graylog/graylog/
+    # mem_limit: 1g
   graylog:
-    image: graylog/graylog:3.0
     restart: always
-    container_name: graylog-server
+    image: graylog/graylog:2.4.6-1
+    container_name: graylog_server
+    volumes:
+      - ./graylogLog:/usr/share/graylog/data/journal
     environment:
-      # echo -n "admin" | sha256sum
+      # https://github.com/Graylog2/graylog2-server/blob/2.5/misc/graylog.conf
+      - TZ=Asia/Shanghai
+      - "JAVA_OPTS=-Xms512m -Xmx512m"
+      # echo -n "admin" |sha256sum
       - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
-      - GRAYLOG_HTTP_EXTERNAL_URI=http://128.0.255.104:9000/
+      - GRAYLOG_WEB_ENDPOINT_URI=http://172.16.11.146:9000/api
       - GRAYLOG_TRANSPORT_EMAIL_ENABLED=true
       - GRAYLOG_TRANSPORT_EMAIL_HOSTNAME=smtp.qq.com
       - GRAYLOG_TRANSPORT_EMAIL_PORT=25
       - GRAYLOG_TRANSPORT_EMAIL_USE_AUTH=false
       - GRAYLOG_TRANSPORT_EMAIL_USE_TLS=false
       - GRAYLOG_TRANSPORT_EMAIL_AUTH_USERNAME=username
+      - GRAYLOG_TRANSPORT_EMAIL_AUTH_PASSWORD=password
       - GRAYLOG_ROOT_TIMEZONE=Asia/Shanghai
-      - "JAVA_OPTS=-Xms512m -Xmx512m"
+      
     links:
       - mongodb:mongo
       - elasticsearch
@@ -52,8 +65,10 @@ services:
       # Graylog web interface and REST API
       - 9000:9000
       # Syslog TCP
+      - 514:514
+      # Syslog UDP
       - 514:514/udp
-      # Syslog Raw
-      - 1514:1514/udp
+      # GELF TCP
+      - 12201:12201
       # GELF UDP
       - 12201:12201/udp
