@@ -1,64 +1,54 @@
-version: '2'
-services:
-  # MongoDB: https://hub.docker.com/_/mongo/
-  mongodb:
-    image: mongo:3
-    restart: always
-    container_name: graylog-db
-    volumes:
-      - ./mongo_data:/data/db
-  # Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/6.6/docker.html
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.1
-    restart: always
-    container_name: graylog-es
-    volumes:
-      - /etc/localtime:/etc/localtime
-      - ./elas_data:/usr/share/elasticsearch/data
-    environment:
-      - http.host=0.0.0.0
-      - transport.host=0.0.0.0
-      - network.host=0.0.0.0
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    mem_limit: 1g
-  # Graylog: https://hub.docker.com/r/graylog/graylog/
-  graylog:
-    image: graylog/graylog:3.0
-    restart: always
-    container_name: graylog-server
-    environment:
-      - TZ=Asia/Shanghai
-      # echo -n "admin" | sha256sum
-      - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
-      - GRAYLOG_HTTP_EXTERNAL_URI=http://128.0.255.104:9000/
-      - GRAYLOG_TRANSPORT_EMAIL_ENABLED=true
-      - GRAYLOG_TRANSPORT_EMAIL_HOSTNAME=smtp.qq.com
-      - GRAYLOG_TRANSPORT_EMAIL_PORT=25
-      - GRAYLOG_TRANSPORT_EMAIL_USE_AUTH=false
-      - GRAYLOG_TRANSPORT_EMAIL_USE_TLS=false
-      - GRAYLOG_TRANSPORT_EMAIL_AUTH_USERNAME=username
-      - GRAYLOG_TRANSPORT_EMAIL_AUTH_PASSWORD=pass
-      - GRAYLOG_TRANSPORT_EMAIL_SUBJECT_PREFIX=GraylogAlert
-      - GRAYLOG_TRANSPORT_EMAIL_FROM_EMAIL=user@domain.com
-      - GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL=http://128.0.255.104:9000/
-      - GRAYLOG_ROOT_TIMEZONE=Asia/Shanghai
-      - "JAVA_OPTS=-Xms512m -Xmx512m"
-    links:
-      - mongodb:mongo
-      - elasticsearch
-    depends_on:
-      - mongodb
-      - elasticsearch
-    ports:
-      # Graylog web interface and REST API
-      - 9000:9000
-      # Syslog TCP
-      - 514:514/udp
-      # Syslog Raw
-      - 1514:1514/udp
-      # GELF UDP
-      - 12201:12201/udp
+# MongoDB: https://hub.docker.com/_/mongo/
+mongodb:
+  image: mongo:3
+  restart: always
+  container_name: graylog-db
+  net: host
+  volumes:
+    - ./mongo_data:/data/db
+# Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/6.6/docker.html
+elasticsearch:
+  image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.1
+  restart: always
+  container_name: graylog-es
+  net: host
+  volumes:
+    - /etc/localtime:/etc/localtime
+    - ./elas_data:/usr/share/elasticsearch/data
+  environment:
+    - http.host=0.0.0.0
+    - transport.host=0.0.0.0
+    - network.host=0.0.0.0
+    - "ES_JAVA_OPTS=-Xms3000m -Xmx3000m"
+  ulimits:
+    memlock:
+      soft: -1
+      hard: -1
+  mem_limit: 4g
+# Graylog: https://hub.docker.com/r/graylog/graylog/
+graylog:
+  image: graylog/graylog:3.0
+  restart: always
+  net: host
+  container_name: graylog-server
+  environment:
+    - TZ=Asia/Shanghai
+    - GRAYLOG_ELASTICSEARCH_HOSTS=http://localhost:9200
+    - GRAYLOG_MONGODB_URI=mongodb://localhost/graylog
+    # echo -n "admin" | sha256sum
+    - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+    # IP设置成宿主机IP
+    - GRAYLOG_HTTP_EXTERNAL_URI=http://128.0.255.10:9000/
+    - GRAYLOG_TRANSPORT_EMAIL_ENABLED=true
+    - GRAYLOG_TRANSPORT_EMAIL_HOSTNAME=smtp.sina.com
+    - GRAYLOG_TRANSPORT_EMAIL_PORT=25
+    - GRAYLOG_TRANSPORT_EMAIL_USE_AUTH=true
+    - GRAYLOG_TRANSPORT_EMAIL_USE_TLS=false
+    # 用以邮件告警，填写真实相关信息
+    - GRAYLOG_TRANSPORT_EMAIL_AUTH_USERNAME=username@sina.com
+    - GRAYLOG_TRANSPORT_EMAIL_AUTH_PASSWORD=userpass
+    - GRAYLOG_TRANSPORT_EMAIL_SUBJECT_PREFIX=GraylogAlert
+    - GRAYLOG_TRANSPORT_EMAIL_FROM_EMAIL=username@sina.com
+    - GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL=http://128.0.255.10:9000/
+    - GRAYLOG_ROOT_TIMEZONE=Asia/Shanghai
+    - "JAVA_OPTS=-Xms512m -Xmx512m"
