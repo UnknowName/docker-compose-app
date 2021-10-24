@@ -1,0 +1,32 @@
+jaeger-es:
+  image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.1
+  container_name: jaeger-es
+  restart: always
+  # 9200
+  net: host
+  volumes:
+  - ./data:/usr/share/elasticsearch/data
+  environment:
+  - TZ=Asia/Shanghai
+
+jaeger-collector:
+  image: jaegertracing/jaeger-collector
+  container_name: jaeger-collector
+  restart: always
+  # 14268,14250
+  net: host
+  environment:
+  - SPAN_STORAGE_TYPE=elasticsearch
+  - ES_SERVER_URLS=http://128.0.255.10:9201
+  - TZ=Asia/Shanghai
+
+jaeger-query:
+  image:  jaegertracing/jaeger-query
+  container_name: jaeger-query
+  restart: always
+  # 16686
+  net: host
+  environment:
+  - SPAN_STORAGE_TYPE=elasticsearch
+  - ES_SERVER_URLS=http://128.0.255.10:9200
+  - TZ=Asia/Shanghai
