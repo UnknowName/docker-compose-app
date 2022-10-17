@@ -1,0 +1,69 @@
+groups:
+- name: Node Alive
+  rules:
+  - alert:  node down
+    expr: up == 0
+    for: 1m    #多久是这个状态就告警
+    labels:
+      severity: error
+    annotations:
+      summary: "Instance {{ $labels.instance  }} ：{{ $labels.mountpoint }}" # 自定义摘要
+      description: "{{ $labels.mountpoint }} {{ $value }}" # 自定义具体描述
+
+- name: CPU使用率大于90%
+  rules:
+  - alert: CPU使用率大于90%
+    expr: 100 - (avg by (hostname)(irate(node_cpu_seconds_total{mode="idle"}[1m]) )) * 100 > 90
+    # expr: 100 - (irate(node_cpu_seconds_total{mode="idle"}[1m])) * 100 > 2
+    for: 1m
+    labels:
+      severity: alert
+    annotations:
+      description: "{{ $value }}"
+
+- name: CPU 5分钟每均负载大于1.5
+  rules:
+  - alert: CPU负载过高
+    expr: count by (instance) (node_load5) / count by (instance)  (node_cpu_seconds_total{mode="system"}) > 1.5
+    for: 1m
+    annotations:
+      description: "{{ $value }}"
+
+- name: 连接数已使用90%
+  rules:
+  - alert: 并发连接数过高
+    expr: (node_filefd_allocated / 65535) * 100 > 90
+    for: 5m
+    annotations:
+      description: "{{ $value }}"
+
+- name: general.rules
+  rules:
+  - alert: 数据磁盘使用超95%
+    expr: 100 - (node_filesystem_free_bytes{mountpoint="/data",fstype=~"ext4|xfs"} / node_filesystem_size_bytes{fstype=~"ext4|xfs"} * 100) > 95
+    for: 30m    #多久是这个状态就告警
+    labels:
+      severity: warning
+    annotations:
+      summary: "Instance {{ $labels.instance  }} ：{{ $labels.mountpoint }} 分区使用率过高" # 自定义摘要
+      description: "{{ $value }}" # 自定义具体描述
+
+  - alert: 系统磁盘使用超95%
+    expr: 100 - (node_filesystem_free_bytes{mountpoint="/etc/hosts",fstype=~"ext4|xfs"} / node_filesystem_size_bytes{fstype=~"ext4|xfs"} * 100) > 95
+    for: 30m    #多久是这个状态就告警
+    labels:
+      severity: warning
+    annotations:
+      summary: "Instance {{ $labels.instance  }} ：{{ $labels.mountpoint }} 分区使用率过高" # 自定义摘要
+      description: "{{ $value }}" # 自定义具体描述
+
+- name: 内存报警规则
+  rules:
+  - alert: 内存使用率告警
+    expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 92
+    # expr: (node_memory_MemTotal_bytes - (node_memory_MemFree_bytes+node_memory_Buffers_bytes+node_memory_Cached_bytes )) / node_memory_MemTotal_bytes * 100 > 80
+    for: 1m
+    labels:
+      severity: alert
+    annotations:
+      description: "{{ $value }}%"
