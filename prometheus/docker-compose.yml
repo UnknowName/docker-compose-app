@@ -8,6 +8,17 @@ prome:
     - ./rules:/rules
   environment:
     - TZ=Asia/Shanghai
+    
+vm:
+  image: victoriametrics/victoria-metrics
+  container_name: vm
+  ports:
+    - 8428:8428
+  volumes:
+    - ./victoria-metrics-data:/victoria-metrics-data
+  command:
+    -retentionPeriod=15d 
+    
 
 alert:
   image: docker.io/prom/alertmanager
